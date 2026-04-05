@@ -1,4 +1,4 @@
-from google import genai
+from agent.llm import call_llm
 from dotenv import load_dotenv
 import os
 import json
@@ -8,10 +8,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from agent.rag import retrieve_owasp_context
 
-load_dotenv()
-
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
+load_dotenv()       
 
 
 def classify_severity(api_record: dict) -> str:
@@ -85,17 +82,14 @@ TECHNICAL FIX:
 {action_instruction}
 """
 
-    response = client.models.generate_content(
-        model=MODEL,
-        contents=prompt
-    )
+    analysis = call_llm(prompt)
     
     return {
         "endpoint": api_record["endpoint"],
         "state": state,
         "severity": severity,
         "owasp_flags": api_record["owasp_flags"],
-        "analysis": response.text
+        "analysis": analysis
     }
 
 
